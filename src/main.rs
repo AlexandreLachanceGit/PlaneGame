@@ -1,9 +1,9 @@
 use bevy::{prelude::*};
-mod plugin_test;
+mod world_gen;
 
 fn main() {
     App::build()
         .add_plugins(DefaultPlugins)
-        .add_plugin(plugin_test::HelloPlugin)
+        .add_plugin(world_gen::WorldGen)
         .run();
 }
