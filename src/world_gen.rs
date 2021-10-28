@@ -5,7 +5,7 @@ pub struct WorldGen;
 impl Plugin for WorldGen {
     fn build(&self, app: &mut AppBuilder) {
         app.add_startup_system(setup.system())
-            .add_system(movement_system.system());
+            .add_system(spin.system());
     }
 }
 
@@ -22,16 +22,11 @@ fn setup(
         material: materials.add(Color::rgb(1.0, 0.0, 0.0).into()),
         transform: Transform::from_xyz(0.0, 0.0, 0.0),
         ..Default::default()
-    });
+    }).insert(Spin {speed: 4.0});
 
     // light
     commands.spawn_bundle(LightBundle {
         transform: Transform::from_xyz(4.0, 8.0, 4.0),
-        ..Default::default()
-    });
-    // camera
-    commands.spawn_bundle(PerspectiveCameraBundle {
-        transform: Transform::from_xyz(2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
         ..Default::default()
     });
     println!("World generated!");
@@ -43,7 +38,7 @@ struct Spin {
 
 fn create_mesh() -> Mesh {
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
-    let indices = vec![0, 1, 2, 1, 3, 2];
+    let indices = vec![0, 1, 2, 1, 3, 2, 2,1,0, 2,3,1];
     let positions = vec![
         [0.0, 0.0, 0.0],
         [1.0, 0.0, 0.0],
@@ -79,8 +74,8 @@ fn get_uvs(nb_verticies: usize) -> Vec<[f32; 2]> {
     uvs
 }
 
-fn movement_system(time: Res<Time>, mut query: Query<(&Spin, &mut Transform)>) {
+fn spin(time: Res<Time>, mut query: Query<(&Spin, &mut Transform)>) {
     for (spin, mut transform) in query.iter_mut() {
-        transform.rotate(Quat::from_rotation_z(spin.speed * time.delta_seconds()));
+        transform.rotate(Quat::from_rotation_x(spin.speed * time.delta_seconds()));
     }
 }
