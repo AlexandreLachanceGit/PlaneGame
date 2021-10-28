@@ -15,31 +15,15 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     println!("Generating world...");
-    let triangle_mesh = create_mesh();
+    let mesh = create_mesh();
     commands.spawn_bundle(PbrBundle {
         //mesh: meshes.add(Mesh::from(shape::Cube{size: 1.0})),//create_mesh()),
-        mesh: meshes.add(triangle_mesh),
+        mesh: meshes.add(mesh),
         material: materials.add(Color::rgb(1.0, 0.0, 0.0).into()),
-        transform: Transform::from_xyz(-2.0, 0.5, 0.0),
+        transform: Transform::from_xyz(0.0, 0.0, 0.0),
         ..Default::default()
-    }).insert(Spin { speed: 2.0 });
+    });
 
-    // cube
-    commands
-        .spawn_bundle(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-            material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-            transform: Transform::from_xyz(0.0, 0.5, 0.0),
-            ..Default::default()
-        }).insert(Spin { speed: 2.0 });
-        
-    commands
-        .spawn_bundle(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-            material: materials.add(Color::rgb(0.8, 0.7, 0.6).into()),
-            transform: Transform::from_xyz(2.0, 0.5, 0.0),
-            ..Default::default()
-        }).insert(Spin { speed: 4.0 });
     // light
     commands.spawn_bundle(LightBundle {
         transform: Transform::from_xyz(4.0, 8.0, 4.0),
@@ -59,46 +43,44 @@ struct Spin {
 
 fn create_mesh() -> Mesh {
     let mut mesh = Mesh::new(PrimitiveTopology::TriangleList);
-    let vertices = vec![[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 1.0, 0.0]];
+    let indices = vec![0, 1, 2, 1, 3, 2];
+    let positions = vec![
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0],
+    ];
 
-    mesh.set_attribute(Mesh::ATTRIBUTE_POSITION, vertices);
-    mesh.set_attribute(Mesh::ATTRIBUTE_NORMAL, vec![1.0, 1.0, 1.0]);
-    mesh.set_attribute(
-        Mesh::ATTRIBUTE_UV_0,
-        vec![[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]],
-    );
-    mesh.set_indices(Some(Indices::U32(vec![0, 1, 2])));
+    let nb_verticies: usize = positions.len();
+    mesh.set_indices(Some(Indices::U32(indices)));
+    mesh.set_attribute(Mesh::ATTRIBUTE_POSITION, positions);
+    mesh.set_attribute(Mesh::ATTRIBUTE_NORMAL, get_normals(nb_verticies));
+    mesh.set_attribute(Mesh::ATTRIBUTE_UV_0, get_uvs(nb_verticies));
     mesh
 }
 
+fn get_normals(nb_verticies: usize) -> Vec<[f32; 3]> {
+    let mut normals: Vec<[f32; 3]> = Vec::new();
+
+    for _i in 0..nb_verticies {
+        normals.push([0.0, 1.0, 0.0]);
+    }
+
+    normals
+}
+
+fn get_uvs(nb_verticies: usize) -> Vec<[f32; 2]> {
+    let mut uvs: Vec<[f32; 2]> = Vec::new();
+
+    for _i in 0..nb_verticies {
+        uvs.push([1.0, 1.0]);
+    }
+
+    uvs
+}
+
 fn movement_system(time: Res<Time>, mut query: Query<(&Spin, &mut Transform)>) {
-    /*if let Ok((_controller, mut transform)) = query.for_each_mut() {
-        transform.rotate(Quat::from_rotation_z(2.0 * time.delta_seconds()));
-    }*/
     for (spin, mut transform) in query.iter_mut() {
         transform.rotate(Quat::from_rotation_z(spin.speed * time.delta_seconds()));
     }
 }
-/*
-fn paddle_movement_system(
-    time: Res<Time>,
-    keyboard_input: Res<Input<KeyCode>>,
-    mut query: Query<(&Paddle, &mut Transform)>,
-) {
-    if let Ok((paddle, mut transform)) = query.single_mut() {
-        let mut direction = 0.0;
-        if keyboard_input.pressed(KeyCode::Left) {
-            direction -= 1.0;
-        }
-
-        if keyboard_input.pressed(KeyCode::Right) {
-            direction += 1.0;
-        }
-
-        let translation = &mut transform.translation;
-        // move the paddle horizontally
-        translation.x += time.delta_seconds() * direction * paddle.speed;
-        // bound the paddle within the walls
-        translation.x = translation.x.min(380.0).max(-380.0);
-    }
-}*/
