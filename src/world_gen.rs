@@ -15,16 +15,15 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     println!("Generating world...");
-    let mesh = create_mesh(1,2);
-    commands
-        .spawn_bundle(PbrBundle {
-            //mesh: meshes.add(Mesh::from(shape::Cube{size: 1.0})),//create_mesh()),
-            mesh: meshes.add(mesh),
-            material: materials.add(Color::rgb(1.0, 0.0, 0.0).into()),
-            transform: Transform::from_xyz(0.0, 0.0, 0.0),
-            ..Default::default()
-        });
-        //.insert(Spin { speed: 4.0 });
+    let mesh = create_mesh(4, 2);
+    commands.spawn_bundle(PbrBundle {
+        //mesh: meshes.add(Mesh::from(shape::Cube{size: 1.0})),//create_mesh()),
+        mesh: meshes.add(mesh),
+        material: materials.add(Color::rgb(0.0, 0.3, 0.6).into()),
+        transform: Transform::from_xyz(0.0, 0.0, 0.0),
+        ..Default::default()
+    });
+    //.insert(Spin { speed: 4.0 });
 
     // light
     commands.spawn_bundle(LightBundle {
@@ -66,17 +65,22 @@ fn get_positions(length: i32, width: i32) -> Vec<[f32; 3]> {
 }
 
 fn get_indices(length: i32, width: i32) -> Vec<u32> {
-    let mut indices = Vec::new();
+    let nb_squares = (length * width) as u32;
+    let mut indices: Vec<u32> = Vec::new();
 
-    for x in 0..width {
-        for y in 0..length {
-            indices.extend([0 + x, 1 + x, 1 + width, 1 + x, 3, 2 + x]);
-        }
+    for i in 0..nb_squares {
+        indices.extend_from_slice(&[
+            0 + 4 * i,
+            1 + 4 * i,
+            2 + 4 * i,
+            1 + 4 * i,
+            3 + 4 * i,
+            2 + 4 * i,
+        ]);
     }
 
-    let indices = indices.iter().map(|&e| e as u32).rev();
     indices
-} 
+}
 
 fn get_normals(nb_verticies: usize) -> Vec<[f32; 3]> {
     let mut normals: Vec<[f32; 3]> = Vec::new();
