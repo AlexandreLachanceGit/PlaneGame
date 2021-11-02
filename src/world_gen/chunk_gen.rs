@@ -1,8 +1,8 @@
 use bevy::{prelude::*, render::mesh::*, render::pipeline::*};
 
-pub struct WorldGen;
+pub struct ChunkGen;
 
-impl Plugin for WorldGen {
+impl Plugin for ChunkGen {
     fn build(&self, app: &mut AppBuilder) {
         app.add_startup_system(setup.system())
             .add_system(spin.system());
@@ -14,7 +14,8 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    println!("Generating world...");
+    println!("Generating chunk...");
+    let now = std::time::Instant::now();
     let mesh = create_mesh(4, 2);
     commands.spawn_bundle(PbrBundle {
         //mesh: meshes.add(Mesh::from(shape::Cube{size: 1.0})),//create_mesh()),
@@ -30,7 +31,9 @@ fn setup(
         transform: Transform::from_xyz(4.0, 8.0, 4.0),
         ..Default::default()
     });
-    println!("World generated!");
+
+    let elapsed_time = now.elapsed();
+    println!("Chunk generated in {} seconds.", elapsed_time.as_secs_f32());
 }
 
 struct Spin {
