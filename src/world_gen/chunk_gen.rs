@@ -1,43 +1,7 @@
 use bevy::{prelude::*, render::mesh::*, render::pipeline::*};
 
-pub struct ChunkGen;
-
-impl Plugin for ChunkGen {
-    fn build(&self, app: &mut AppBuilder) {
-        app.add_startup_system(setup.system())
-            .add_system(spin.system());
-    }
-}
-
-fn setup(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
-    println!("Generating chunk...");
-    let now = std::time::Instant::now();
-    let mesh = create_mesh(4, 2);
-    commands.spawn_bundle(PbrBundle {
-        //mesh: meshes.add(Mesh::from(shape::Cube{size: 1.0})),//create_mesh()),
-        mesh: meshes.add(mesh),
-        material: materials.add(Color::rgb(0.0, 0.3, 0.6).into()),
-        transform: Transform::from_xyz(0.0, 0.0, 0.0),
-        ..Default::default()
-    });
-    //.insert(Spin { speed: 4.0 });
-
-    // light
-    commands.spawn_bundle(LightBundle {
-        transform: Transform::from_xyz(4.0, 8.0, 4.0),
-        ..Default::default()
-    });
-
-    let elapsed_time = now.elapsed();
-    println!("Chunk generated in {} seconds.", elapsed_time.as_secs_f32());
-}
-
-struct Spin {
-    speed: f32,
+pub fn create_square_mesh(size: i32) -> Mesh {
+    create_mesh(size, size)
 }
 
 fn create_mesh(length: i32, width: i32) -> Mesh {
@@ -103,10 +67,4 @@ fn get_uvs(nb_verticies: usize) -> Vec<[f32; 2]> {
     }
 
     uvs
-}
-
-fn spin(time: Res<Time>, mut query: Query<(&Spin, &mut Transform)>) {
-    for (spin, mut transform) in query.iter_mut() {
-        transform.rotate(Quat::from_rotation_x(spin.speed * time.delta_seconds()));
-    }
 }
