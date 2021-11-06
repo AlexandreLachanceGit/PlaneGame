@@ -49,12 +49,13 @@ fn setup(
 }
 
 fn world_gen_data_changed(
-    mut q: Query<(&mut ChunkData, &Handle<Mesh>)>,
+    mut chunk_size_query: Query<(&mut ChunkData, &Handle<Mesh>)>,
+    //mut world_size_query: Query<(&mut ChunkData, &Handle<Mesh>)>,
     mut meshes: ResMut<Assets<Mesh>>,
     world_gen_data: Res<world_gen::WorldGenData>,
 ) {
     if world_gen_data.is_changed() {
-        for (_chunk_data, mesh) in q.iter_mut() {
+        for (_chunk_data, mesh) in chunk_size_query.iter_mut() {
             meshes.set_untracked(
                 mesh,
                 world_gen::chunk_gen::create_square_mesh(world_gen_data.chunk_size),

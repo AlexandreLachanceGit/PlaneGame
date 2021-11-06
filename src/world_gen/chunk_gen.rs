@@ -21,10 +21,16 @@ fn get_positions(length: i32, width: i32) -> Vec<[f32; 3]> {
 
     for x in 0..width {
         for y in 0..length {
+            /*
             positions.push([0.0 + x as f32, 0.0 + y as f32, 0.0]);
             positions.push([1.0 + x as f32, 0.0, 0.0]);
             positions.push([0.0 + x as f32, 1.0 + y as f32, 0.0]);
-            positions.push([1.0 + x as f32, 1.0 + y as f32, 0.0]);
+            positions.push([1.0 + x as f32, 1.0 + y as f32, 0.0]);*/
+
+            positions.push([0.0 + x as f32, 0.0, 0.0 + y as f32]);
+            positions.push([1.0 + x as f32, 0.0, 0.0]);
+            positions.push([0.0 + x as f32, 0.0, 1.0 + y as f32]);
+            positions.push([1.0 + x as f32, 0.0, 1.0 + y as f32]);
         }
     }
 
@@ -37,12 +43,12 @@ fn get_indices(length: i32, width: i32) -> Vec<u32> {
 
     for i in 0..nb_squares {
         indices.extend_from_slice(&[
+            2 + 4 * i,
+            1 + 4 * i,
             0 + 4 * i,
-            1 + 4 * i,
             2 + 4 * i,
-            1 + 4 * i,
             3 + 4 * i,
-            2 + 4 * i,
+            1 + 4 * i,
         ]);
     }
 
