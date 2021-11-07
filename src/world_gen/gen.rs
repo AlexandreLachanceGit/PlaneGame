@@ -16,49 +16,72 @@ impl Plugin for WorldGen {
     }
 }
 
-struct ChunkData {}
+struct ChunkData {
+    pos_x: i32,
+    pos_y: i32,
+    size: i32,
+}
 
 fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    mut world_gen_data: ResMut<world_gen::WorldGenData>,
+    world_gen_data: ResMut<world_gen::WorldGenData>,
 ) {
     // Spawn all chunks
-    for _i in 0..world_gen_data.size * world_gen_data.size {
-        let chunk_size = world_gen_data.chunk_size;
-        world_gen_data.chunks.push(
+    for x in 0..world_gen_data.size {
+        for y in 0..world_gen_data.size {
+            let chunk_size = world_gen_data.chunk_size;
             commands
                 .spawn()
-                .insert(ChunkData {})
+                .insert(ChunkData {
+                    pos_x: x,
+                    pos_y: y,
+                    size: chunk_size,
+                })
                 .insert_bundle(PbrBundle {
                     mesh: meshes.add(world_gen::chunk_gen::create_square_mesh(chunk_size)),
-                    material: materials.add(Color::rgb(0.0, 0.3, 0.6).into()),
-                    transform: Transform::from_xyz(0.0, 0.0, 0.0),
+                    material: if (y + x) % 2 == 0 {
+                        materials.add(Color::WHITE.into())
+                    } else {
+                        materials.add(Color::BLACK.into())
+                    },
+                    transform: Transform::from_xyz(
+                        (x * chunk_size) as f32,
+                        0.0,
+                        (y * chunk_size) as f32,
+                    ),
                     ..Default::default()
-                })
-                .id(),
-        )
+                });
+        }
     }
 
     // light
     commands.spawn_bundle(LightBundle {
-        transform: Transform::from_xyz(4.0, 8.0, 4.0),
+        transform: Transform::from_xyz(4.0, 10.0, 4.0),
         ..Default::default()
     });
 }
 
 fn world_gen_data_changed(
-    mut chunk_size_query: Query<(&mut ChunkData, &Handle<Mesh>)>,
+    mut chunk_query: Query<(&mut ChunkData, &mut Transform, &Handle<Mesh>)>,
     //mut world_size_query: Query<(&mut ChunkData, &Handle<Mesh>)>,
     mut meshes: ResMut<Assets<Mesh>>,
     world_gen_data: Res<world_gen::WorldGenData>,
 ) {
     if world_gen_data.is_changed() {
-        for (_chunk_data, mesh) in chunk_size_query.iter_mut() {
+        for (mut chunk_data, mut transform, mesh) in chunk_query.iter_mut() {
+            if chunk_data.size != world_gen_data.chunk_size {
+                chunk_data.size = world_gen_data.chunk_size;
+            }
             meshes.set_untracked(
                 mesh,
                 world_gen::chunk_gen::create_square_mesh(world_gen_data.chunk_size),
+            );
+            transform.translation = Vec3::new(
+                (chunk_data.pos_x * world_gen_data.chunk_size) as f32,
+                0.0,
+                (chunk_data.pos_y * world_gen_data.chunk_size) as f32,
             );
         }
     }

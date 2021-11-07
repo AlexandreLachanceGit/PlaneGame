@@ -8,9 +8,8 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(EguiPlugin)
         .insert_resource(world_gen::WorldGenData {
-            size: 1,
+            size: 4,
             chunk_size: 4,
-            chunks: Vec::new(),
         })
         .add_plugin(world_gen::gen::WorldGen)
         .add_plugin(camera::Camera)
