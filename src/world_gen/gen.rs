@@ -64,16 +64,44 @@ fn setup(
 }
 
 fn world_gen_data_changed(
-    mut chunk_query: Query<(&mut ChunkData, &mut Transform, &Handle<Mesh>)>,
-    //mut world_size_query: Query<(&mut ChunkData, &Handle<Mesh>)>,
+    mut commands: Commands,
+    mut chunk_query: Query<(&mut ChunkData, &mut Transform, &Handle<Mesh>, Entity)>,
     mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
     world_gen_data: Res<world_gen::WorldGenData>,
 ) {
     if world_gen_data.is_changed() {
-        for (mut chunk_data, mut transform, mesh) in chunk_query.iter_mut() {
-            if chunk_data.size != world_gen_data.chunk_size {
-                chunk_data.size = world_gen_data.chunk_size;
+        for (_chunk_data, _transform, _mesh, entity) in chunk_query.iter_mut() { 
+            commands.entity(entity).despawn();
+        }
+
+        for x in 0..world_gen_data.size {
+            for y in 0..world_gen_data.size {
+                let chunk_size = world_gen_data.chunk_size;
+                commands
+                    .spawn()
+                    .insert(ChunkData {
+                        pos_x: x,
+                        pos_y: y,
+                        size: chunk_size,
+                    })
+                    .insert_bundle(PbrBundle {
+                        mesh: meshes.add(world_gen::chunk_gen::create_square_mesh(chunk_size)),
+                        material: if (y + x) % 2 == 0 {
+                            materials.add(Color::WHITE.into())
+                        } else {
+                            materials.add(Color::BLACK.into())
+                        },
+                        transform: Transform::from_xyz(
+                            (x * chunk_size) as f32,
+                            0.0,
+                            (y * chunk_size) as f32,
+                        ),
+                        ..Default::default()
+                    });
             }
+        }
+        /*for (mut chunk_data, mut transform, mesh) in chunk_query.iter_mut() {
             meshes.set_untracked(
                 mesh,
                 world_gen::chunk_gen::create_square_mesh(world_gen_data.chunk_size),
@@ -83,6 +111,6 @@ fn world_gen_data_changed(
                 0.0,
                 (chunk_data.pos_y * world_gen_data.chunk_size) as f32,
             );
-        }
+        }*/
     }
 }
