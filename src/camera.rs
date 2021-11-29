@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::render::camera::*;
 
 pub struct Camera;
 
@@ -19,6 +20,10 @@ fn setup(mut commands: Commands) {
     commands
         .spawn_bundle(PerspectiveCameraBundle {
             transform: Transform::from_xyz(-20.0, 100.0, -20.0).looking_at(Vec3::ZERO, Vec3::Y),
+            perspective_projection: PerspectiveProjection {
+                far: 100000.0,
+                ..Default::default()
+            },
             ..Default::default()
         })
         .insert(Controllable {
